@@ -39,7 +39,6 @@
         .btn-mode { background-color: #4a5568; color: white; flex: 1; }
         .btn-mode.active { background-color: #ecc94b; color: #1a202c; }
 
-        /* 📱 レイアウトベース */
         .main-layout { display: flex; flex-direction: column; gap: 12px; width: 100%; }
         .left-panel { width: 100%; }
         .right-panel { width: 100%; display: flex; flex-direction: column; gap: 12px; }
@@ -51,11 +50,10 @@
         label { display: block; font-size: 11px; font-weight: bold; margin-bottom: 4px; color: #718096; }
         input, select, textarea { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 14px; background-color: #f7fafc; -webkit-appearance: none; }
 
-        .legend { display: flex; gap: 10px; margin-bottom: 12px; font-size: 11px; font-weight: bold; justify-content: center; }
+        .legend { display: flex; gap: 10px; margin-bottom: 12px; font-size: 11px; font-weight: bold; justify-content: center; flex-wrap: wrap; }
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .legend-box { width: 12px; height: 12px; border-radius: 3px; }
 
-        /* 🗺 マップの外枠（ここを基準にスマホ幅に合わせます） */
         .floor-map-wrapper { 
             width: 100%; 
             background-color: #edf2f7; 
@@ -65,26 +63,32 @@
             overflow: hidden; 
         }
         
-        /* 元の美しいL字が絶対に崩れない固定サイズ（440px × 340px） */
         .floor-map-container { 
             position: relative; 
             width: 440px; 
             height: 340px; 
             margin: 0;
-            transform-origin: top left; /* 左上を基準に縮小 */
+            transform-origin: top left;
         }
         
         .desk {
             position: absolute; width: 62px; height: 52px; background-color: var(--seat-empty); color: white;
             border-radius: 6px; display: flex; flex-direction: column; justify-content: center; align-items: center;
             font-weight: bold; cursor: pointer; box-shadow: 0 3px 5px rgba(0,0,0,0.1); user-select: none; z-index: 10;
+            transition: border 0.2s, box-shadow 0.2s;
+            border: 3px solid transparent;
         }
         .desk-num { font-size: 15px; }
-        .desk-status { font-size: 10px; margin-top: 1px; opacity: 0.9; }
+        .desk-status { font-size: 9px; margin-top: 1px; opacity: 0.9; text-align: center; max-width: 58px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         
         .desk.half { background-color: var(--seat-half); }
         .desk.full { background-color: var(--seat-full); }
-        .desk.mode-edit { background-color: var(--seat-edit); color: #1a202c; cursor: move; border: 2px dashed #000; }
+        .desk.mode-edit { background-color: var(--seat-edit); color: #1a202c; cursor: move; border: 3px dashed #000; }
+
+        .desk.group-0 { border-color: #1a202c !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 20; }
+        .desk.group-1 { border-color: #00ffcc !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 20; }
+        .desk.group-2 { border-color: #ff007f !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 20; }
+        .desk.group-3 { border-color: #ffffff !important; box-shadow: 0 4px 12px rgba(0,0,0,0.4); z-index: 20; }
 
         .form-group { margin-bottom: 10px; }
         .reservation-list-container { flex: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 6px; max-height: 250px; }
@@ -101,19 +105,19 @@
         .multi-title { font-size: 11px; font-weight: bold; color: #2b6cb0; margin-bottom: 4px; }
 
         .time-lock-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-color: rgba(45, 55, 72, 0.85); z-index: 1000;
-            display: flex; justify-content: center; align-items: center;
-            border-radius: 10px; backdrop-filter: blur(4px); padding: 10px;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(45, 55, 72, 0.9); z-index: 10000;
+            display: flex; justify-content: center; align-items: flex-start;
+            padding-top: 20px;
+            backdrop-filter: blur(5px);
         }
         .time-lock-modal {
             background: white; border-radius: 12px; padding: 20px; max-width: 360px; width: 95%;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: 3px solid #3182ce;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.3); border: 3px solid #3182ce;
         }
         .time-lock-title { font-size: 16px; font-weight: bold; margin-bottom: 8px; color: #2b6cb0; text-align: center; }
         .time-lock-desc { font-size: 13px; color: #4a5568; margin-bottom: 16px; line-height: 1.4; text-align: center; }
 
-        /* 💻 PCサイズ（768px以上） */
         @media (min-width: 768px) {
             body { padding: 15px; }
             .header { flex-direction: row; justify-content: space-between; align-items: center; padding: 12px 20px; }
@@ -124,6 +128,7 @@
             .left-panel { flex: 1.3; }
             .right-panel { flex: 1; }
             .search-bar { grid-template-columns: repeat(4, 1fr); }
+            .time-lock-overlay { align-items: center; padding-top: 0; }
         }
     </style>
 </head>
@@ -184,6 +189,7 @@
                 <div class="legend-item"><div class="legend-box" style="background:var(--seat-empty)"></div> 空 (0/2)</div>
                 <div class="legend-item"><div class="legend-box" style="background:var(--seat-half)"></div> 1名 (1/2)</div>
                 <div class="legend-item"><div class="legend-box" style="background:var(--seat-full)"></div> 満卓 (2/2)</div>
+                <div class="legend-item">⏱ ※予約は一律 2時間30分 自動キープされます</div>
             </div>
 
             <div id="modeIndicator" class="mode-indicator">⚠️ 席移動モード中。配置は選択中の日にのみ保存されます。</div>
@@ -233,11 +239,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label>予約日 / 時間</label>
-                        <div style="display:flex; gap:5px;">
-                            <input type="date" id="resDate" readonly style="background:#e2e8f0; flex:1.2;">
-                            <select id="resTime" required style="flex:1.8;"></select>
-                        </div>
+                        <label>予約時間</label>
+                        <select id="resTime" required></select>
                     </div>
                     <div class="form-group">
                         <label>お客様名（インスタ等）</label>
@@ -262,7 +265,7 @@
                 <div class="panel-title">📋 選択日の予約一覧</div>
                 <div class="reservation-list-container">
                     <table class="reservation-list-table">
-                        <thead><tr><th>時間</th><th>机</th><th>枠</th><th>お名前</th><th>操作</th></tr></thead>
+                        <thead><tr><th>滞在時間</th><th>机</th><th>枠</th><th>お名前</th><th>操作</th></tr></thead>
                         <tbody id="listBody"></tbody>
                     </table>
                 </div>
@@ -273,8 +276,8 @@
 <script>
     const DEFAULT_START = 11;
     const DEFAULT_END = 22;
+    const STAY_MINUTES = 150; // ⏱ 一律2時間30分自動キープ
 
-    // 🎯 最初の美しいL字配置のオリジナルデータを完全固定
     const defaultDesks = [
         { id: "10", name: "10", top: 15, left: 15 },
         { id: "11", name: "11", top: 15, left: 78 },
@@ -303,50 +306,59 @@
     window.addEventListener('DOMContentLoaded', () => {
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('viewDate').value = today;
-        document.getElementById('resDate').value = today;
 
         initHourDropdowns();
         loadData();
         cleanupPastData();
         checkDateAndSetup(today);
         
-        // どんな画面サイズでもリアルタイムに絶対はみ出させない縮小処理を登録
         adjustMapScale();
         window.addEventListener('resize', adjustMapScale);
-        // 定期的に実行してサイズズレを徹底防止
         setInterval(adjustMapScale, 200);
     });
 
-    // 🗺 どんなブラウザでも100%絶対に狂わない王道のリアルタイム縮小処理
+    // ⏱ 時間操作ユーティリティ
+    function timeToMins(tStr) {
+        const [h, m] = tStr.split(':').map(Number);
+        return h * 60 + m;
+    }
+    function minsToTime(mins) {
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    // 表示中の15分枠が、予約の滞在時間内（2時間30分）に含まれているか判定
+    function isTimeIntersecting(viewTimeStr, resTimeStr) {
+        const viewMin = timeToMins(viewTimeStr);
+        const resStart = timeToMins(resTimeStr);
+        const resEnd = resStart + STAY_MINUTES;
+        return (viewMin >= resStart && viewMin < resEnd);
+    }
+
     function adjustMapScale() {
         const wrapper = document.getElementById('mapWrapper');
         const container = document.getElementById('floorMapContainer');
         if (!wrapper || !container) return;
 
-        // 点線枠の内側の「純粋に使える横幅」を算出
         const wrapperWidth = wrapper.clientWidth;
         const computedStyle = window.getComputedStyle(wrapper);
         const paddingX = parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
         const availableWidth = wrapperWidth - paddingX;
 
-        const mapWidth = 440;  // 設計上の固定幅
-        const mapHeight = 340; // 設計上の固定高さ
+        const mapWidth = 440;
+        const mapHeight = 340;
 
-        // PCサイズ（768px以上）の時は縮小しない
         if (window.innerWidth >= 768) {
             container.style.transform = 'scale(1)';
             wrapper.style.height = 'auto';
             return;
         }
 
-        // スマホ画面の時は自動で完璧な縮小率を算出
         let scale = availableWidth / mapWidth;
         if (scale > 1) scale = 1;
 
-        // 縮小を適用
         container.style.transform = `scale(${scale})`;
-        
-        // 縮小によって生じる上下の空白をピッタリ埋めて綺麗に見せる
         wrapper.style.height = `${(mapHeight * scale) + paddingX}px`;
     }
 
@@ -362,7 +374,7 @@
     }
 
     function clearLocalStorageLayouts() {
-        if(confirm("これまでにブラウザに保存された【すべての日付の席の配置データ】を完全に消去し、最新の配置にリセットしますか？\n\n※お客様の「予約データ」は残ります。")) {
+        if(confirm("これまでにブラウザに保存された【すべての日付の席的配置データ】を完全に消去し、最新の配置にリセットしますか？")) {
             localStorage.removeItem('daily_configs');
             alert("配置記憶をクリアしました！元のきれいなL字配置に戻ります。");
             window.location.reload();
@@ -402,7 +414,6 @@
     }
 
     function checkDateAndSetup(date) {
-        // バグで位置が壊れるのを防ぐため、毎日オリジナルの綺麗な配置をクローンして適用
         if (!dailyConfigs[date]) {
             dailyConfigs[date] = {
                 start: DEFAULT_START,
@@ -411,8 +422,9 @@
                 isSet: false
             };
         } else {
-            // 既存の日付でも配置データが壊れていたら強制修復
-            dailyConfigs[date].layout = JSON.parse(JSON.stringify(defaultDesks));
+            if(!dailyConfigs[date].layout || dailyConfigs[date].layout.length === 0) {
+                dailyConfigs[date].layout = JSON.parse(JSON.stringify(defaultDesks));
+            }
         }
 
         if (dailyConfigs[date].isSet) {
@@ -455,7 +467,6 @@
 
     function onDateChange() {
         const date = document.getElementById('viewDate').value;
-        document.getElementById('resDate').value = date;
         checkDateAndSetup(date);
         setTimeout(adjustMapScale, 50);
     }
@@ -522,7 +533,19 @@
 
         const config = dailyConfigs[date];
         currentLayout = config.layout;
-        const currentRes = reservations.filter(r => r.date === date && r.time === time);
+        
+        const currentRes = reservations.filter(r => r.date === date && isTimeIntersecting(time, r.time));
+
+        const nameCountMap = {};
+        currentRes.forEach(r => {
+            nameCountMap[r.customerName] = (nameCountMap[r.customerName] || 0) + 1;
+        });
+
+        const groupNames = Object.keys(nameCountMap).filter(name => nameCountMap[name] > 1);
+        const nameColorMap = {};
+        groupNames.forEach((name, index) => {
+            nameColorMap[name] = index % 4; 
+        });
 
         currentLayout.forEach(desk => {
             const deskEl = document.createElement('div');
@@ -537,15 +560,26 @@
                 deskEl.addEventListener('mousedown', (e) => startDrag(e, desk.id));
                 deskEl.addEventListener('touchstart', (e) => startDrag(e, desk.id), { passive: false });
             } else {
-                const deskRes = currentRes.filter(r => r.deskId === desk.id);
+                const deskRes = currentRes.filter(r => String(r.deskId) === String(desk.id));
                 const count = deskRes.length;
 
                 if (count === 1) deskEl.classList.add('half');
                 if (count === 2) deskEl.classList.add('full');
 
+                let labelText = `${count}/2 席`;
+
+                if (count > 0) {
+                    const firstResName = deskRes[0].customerName;
+                    labelText = firstResName;
+                    
+                    if (nameColorMap[firstResName] !== undefined) {
+                        deskEl.classList.add(`group-${nameColorMap[firstResName]}`);
+                    }
+                }
+
                 deskEl.innerHTML = `
                     <span class="desk-num">${desk.name}</span>
-                    <span class="desk-status">${count}/2 席</span>
+                    <span class="desk-status" title="${labelText}">${labelText}</span>
                 `;
                 deskEl.onclick = () => selectDesk(desk.id, desk.name, deskRes);
             }
@@ -566,7 +600,7 @@
         toggleBookingMode();
 
         slotSelect.onchange = () => {
-            const activeRes = deskReservations.find(r => r.slot === slotSelect.value);
+            const activeRes = deskReservations.find(r => String(r.slot) === String(slotSelect.value));
             if (activeRes) {
                 document.getElementById('resId').value = activeRes.id;
                 document.getElementById('customerName').value = activeRes.customerName;
@@ -576,7 +610,8 @@
                 const name = activeRes.customerName;
                 const time = document.getElementById('viewTime').value;
                 const date = document.getElementById('viewDate').value;
-                const groupCount = reservations.filter(r => r.date === date && r.time === time && r.customerName === name).length;
+                
+                const groupCount = reservations.filter(r => r.date === date && isTimeIntersecting(time, r.time) && r.customerName === name).length;
                 if(groupCount > 1) {
                     document.getElementById('bulkDeleteBtn').style.display = 'inline-block';
                     document.getElementById('bulkDeleteBtn').textContent = `全員削除(${groupCount}名)`;
@@ -595,8 +630,7 @@
             }
         };
         
-        const resSlot1 = deskReservations.find(r => r.slot === "1");
-        slotSelect.value = resSlot1 ? (deskReservations.find(r => r.slot === "2") ? "1" : "2") : "1";
+        slotSelect.value = "1";
         slotSelect.onchange();
 
         document.getElementById('reservationForm').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -604,9 +638,9 @@
 
     function saveReservation(e) {
         e.preventDefault();
-        const id = document.getElementById('resId').value;
+        let id = document.getElementById('resId').value;
         const deskId = document.getElementById('selectedDeskId').value;
-        const date = document.getElementById('resDate').value;
+        const date = document.getElementById('viewDate').value;
         const time = document.getElementById('resTime').value;
         const customerName = document.getElementById('customerName').value.trim();
         const menuMemo = document.getElementById('menuMemo').value.trim();
@@ -619,13 +653,37 @@
             return;
         }
 
+        const nStart = timeToMins(time);
+        const nEnd = nStart + STAY_MINUTES;
+
         if (mode === 'single') {
             const slot = document.getElementById('selectedSlot').value;
-            const isDup = reservations.some(r => r.id !== id && r.date === date && r.time === time && r.deskId === deskId && r.slot === slot);
-            if (isDup) {
-                showAlert(`❌ 指定枠は既に埋まっています。`, 'danger');
+            
+            const titleText = document.getElementById('formTitle').textContent;
+            if (titleText.includes("新規予約")) {
+                id = ""; 
+            }
+
+            const isOccupied = reservations.some(r => {
+                if (r.date !== date || String(r.deskId) !== String(deskId) || String(r.slot) !== String(slot)) return false;
+                const rStart = timeToMins(r.time);
+                const rEnd = rStart + STAY_MINUTES;
+                const timeOverlap = (nStart < rEnd && nEnd > rStart);
+                
+                if (timeOverlap) {
+                    if (id && r.id === id && r.customerName === customerName) {
+                        return false;
+                    }
+                    return true;
+                }
+                return false;
+            });
+
+            if (isOccupied) {
+                showAlert(`❌ 枠${slot}には、指定時間内(2.5時間)にすでに別の予約が入っているため登録・上書きできません。`, 'danger');
                 return;
             }
+
             if (id) {
                 const idx = reservations.findIndex(r => r.id === id);
                 if (idx !== -1) reservations[idx] = { id, deskId, slot, date, time, customerName, menuMemo };
@@ -639,13 +697,24 @@
 
             let allocated = 0;
             const tempBookings = [];
+            let hasOverlapError = false;
 
             for (const d of orderedDesks) {
                 if (allocated >= targetCount) break;
                 for (const slot of ["1", "2"]) {
                     if (allocated >= targetCount) break;
-                    const isOccupied = reservations.some(r => r.date === date && r.time === time && r.deskId === d.id && r.slot === slot);
-                    if (!isOccupied) {
+                    
+                    const isSlotOccupied = reservations.some(r => {
+                        if (r.date !== date || String(r.deskId) !== String(d.id) || String(r.slot) !== String(slot)) return false;
+                        const rStart = timeToMins(r.time);
+                        const rEnd = rStart + STAY_MINUTES;
+                        return (nStart < rEnd && nEnd > rStart);
+                    });
+                    
+                    if (isSlotOccupied) {
+                        hasOverlapError = true;
+                        break;
+                    } else {
                         tempBookings.push({
                             id: 'res_' + Date.now() + '_' + allocated,
                             deskId: d.id,
@@ -658,10 +727,11 @@
                         allocated++;
                     }
                 }
+                if (hasOverlapError) break;
             }
 
-            if (allocated < targetCount) {
-                showAlert(`❌ 空き枠が不足しています。(残り: ${allocated}席)`, 'danger');
+            if (hasOverlapError || allocated < targetCount) {
+                showAlert(`❌ 選択された席の範囲内に、すでに別の予約が入っている枠があるためまとめて予約できません。`, 'danger');
                 return;
             }
             reservations.push(...tempBookings);
@@ -685,8 +755,8 @@
         const time = document.getElementById('viewTime').value;
         const date = document.getElementById('viewDate').value;
         
-        if (name && confirm(`この時間の「${name}」様のグループ予約を一括削除しますか？`)) {
-            reservations = reservations.filter(r => !(r.date === date && r.time === time && r.customerName === name));
+        if (name && confirm(`この時間帯にかぶる「${name}」様のグループ予約を一括削除しますか？`)) {
+            reservations = reservations.filter(r => !(r.date === date && isTimeIntersecting(time, r.time) && r.customerName === name));
             localStorage.setItem('desk_reservations', JSON.stringify(reservations));
             resetForm();
             refreshMap();
@@ -713,8 +783,9 @@
         }
         currentDayRes.forEach(r => {
             const tr = document.createElement('tr');
+            const endTStr = minsToTime(timeToMins(r.time) + STAY_MINUTES);
             tr.innerHTML = `
-                <td>${r.time}</td>
+                <td><span style="color:#2b6cb0;font-weight:bold;">${r.time}～${endTStr}</span></td>
                 <td>${r.deskId}番</td>
                 <td>枠${r.slot}</td>
                 <td><strong>${r.customerName}</strong></td>
@@ -724,7 +795,7 @@
             tr.onclick = () => {
                 document.getElementById('viewTime').value = r.time;
                 refreshMap();
-                const currentRes = reservations.filter(res => res.date === date && res.time === r.time);
+                const currentRes = reservations.filter(res => res.date === date && isTimeIntersecting(r.time, res.time));
                 selectDesk(r.deskId, r.deskId, currentRes);
                 document.getElementById('selectedSlot').value = r.slot;
                 document.getElementById('selectedSlot').onchange();
@@ -733,11 +804,17 @@
         });
     }
 
+    // 🚨 アラート表示をポップアップ化する強化処理
     function showAlert(msg, type) {
         const box = document.getElementById('alertBox');
         box.className = `alert alert-${type}`;
         box.textContent = msg;
         box.style.display = 'block';
+
+        // エラー（danger）だった場合は、画面のド真ん中にポップアップを出して操作をロックする
+        if (type === 'danger') {
+            alert(msg);
+        }
     }
 
     function resetForm() {
