@@ -315,6 +315,9 @@
         adjustMapScale();
         window.addEventListener('resize', adjustMapScale);
         setInterval(adjustMapScale, 200);
+
+        // ☀️ 朝の確認漏れ防止：開いた瞬間に本日の予約一覧をポップアップ表示
+        showTodayNotification(today);
     });
 
     // ⏱ 時間操作ユーティリティ
@@ -334,6 +337,32 @@
         const resStart = timeToMins(resTimeStr);
         const resEnd = resStart + STAY_MINUTES;
         return (viewMin >= resStart && viewMin < resEnd);
+    }
+
+    // ☀️ システム起動時に「本日の予約」を強制ポップアップする関数
+    function showTodayNotification(todayStr) {
+        const todayRes = reservations.filter(r => r.date === todayStr);
+        
+        // 時間 ＞ 机番号 ＞ 枠の順番できれいにソート
+        todayRes.sort((a,b) => (a.time + a.deskId + a.slot).localeCompare(b.time + b.deskId + b.slot));
+
+        let msg = `☀️ おはようございます！\n本日（${todayStr}）の予約状況をお知らせします。\n\n`;
+        msg += `本日の総予約件数: 【 ${todayRes.length} 件 】\n`;
+        msg += `------------------------------------------\n`;
+
+        if (todayRes.length > 0) {
+            todayRes.forEach(r => {
+                const endTStr = minsToTime(timeToMins(r.time) + STAY_MINUTES);
+                msg += `⏰ ${r.time} ～ ${endTStr}\n   👉 ${r.deskId}番卓 (枠${r.slot}) : ${r.customerName} 様\n\n`;
+            });
+            msg += `------------------------------------------\n`;
+            msg += `今日も一日、ミスのないよう頑張りましょう！`;
+        } else {
+            msg += `本日の予約はまだありません。\n`;
+            msg += `------------------------------------------`;
+        }
+
+        alert(msg);
     }
 
     function adjustMapScale() {
@@ -804,14 +833,12 @@
         });
     }
 
-    // 🚨 アラート表示をポップアップ化する強化処理
     function showAlert(msg, type) {
         const box = document.getElementById('alertBox');
         box.className = `alert alert-${type}`;
         box.textContent = msg;
         box.style.display = 'block';
 
-        // エラー（danger）だった場合は、画面のド真ん中にポップアップを出して操作をロックする
         if (type === 'danger') {
             alert(msg);
         }
@@ -892,9 +919,11 @@
         draggedDesk.left = Math.max(0, Math.min(left, 440 - 62));
         draggedDesk.top = Math.max(0, Math.min(top, 340 - 52));
 
-        const el = document.getElementById(`desk-${draggedDesk.id}`);
-        el.style.left = `${draggedDesk.left}px`;
-        el.style.top = `${draggedDesk.top}px`;
+        const el = document.getElementById(`draggedDesk.id`);
+        if(el) {
+            el.style.left = `${draggedDesk.left}px`;
+            el.style.top = `${draggedDesk.top}px`;
+        }
     }
 
     function stopDrag() {
